@@ -1,0 +1,99 @@
+Sub Summarize()
+'
+' Summarize Macro
+'
+' Keyboard Shortcut: Ctrl+w
+x = 2
+yr = 2005
+Mth = 1
+a = 2
+safety = 0
+
+Do While True
+    If IsEmpty(Cells(x, 1)) Then
+        Exit Do
+    End If
+    
+    neghours = 0
+    y = 0
+    Max = -0.01
+    Min = -0.01
+
+    'Creates a changing month variable that can change month by adding 1
+    If Mth = 1 Then
+        Name = "Jan"
+    ElseIf Mth = 2 Then
+        Name = "Feb"
+    ElseIf Mth = 3 Then
+        Name = "Mar"
+    ElseIf Mth = 4 Then
+        Name = "Apr"
+    ElseIf Mth = 5 Then
+        Name = "May"
+    ElseIf Mth = 6 Then
+        Name = "Jun"
+    ElseIf Mth = 7 Then
+        Name = "Jul"
+    ElseIf Mth = 8 Then
+        Name = "Aug"
+    ElseIf Mth = 9 Then
+        Name = "Sep"
+    ElseIf Mth = 10 Then
+        Name = "Oct"
+    ElseIf Mth = 11 Then
+        Name = "Nov"
+    Else
+        Name = "Dec"
+    End If
+    
+    'Note: I cannot use variable names date or year because these are already set in excel
+    Dte = Cells(x + y, 1).Value
+    
+    
+    'For current month, counts negative hours, finds the max and min negative hours.
+    Do While True
+        If InStr(1, Cells(x + y, 1).Text, Name) Then
+            If Cells(x + y, 3).Value <= 0 Then
+                neghours = neghours + 1
+                
+                If Cells(x + y, 3).Value < Min Then
+                    Min = Cells(x + y, 3).Value
+                ElseIf Cells(x + y, 3).Value > Max Then
+                    Max = Cells(x + y, 3).Value
+                End If
+            End If
+        Else
+            Exit Do
+        End If
+        
+        y = y + 1
+    Loop
+    
+    
+    'Pastes results for that month
+    Cells(a, 5).Value = yr
+    Cells(a, 6).Value = Name
+    Cells(a, 7).Value = Dte
+    Cells(a, 8).Value = neghours
+    Cells(a, 9).Value = Max
+    Cells(a, 10).Value = Min
+    Cells(a, 11).Value = Max - Min
+    
+    'changes current month and year
+    If Mth < 12 Then
+        Mth = Mth + 1
+    Else
+        yr = yr + 1
+        Mth = 1
+    End If
+    a = a + 1
+    x = x + y
+    
+    If yr = 2018 Then Exit Do
+    
+    'Safety counter breaks the loop after 10000 iterations to prevent an infinite loop.
+    safety = safety + 1
+    If safety >= 10000 Then Exit Do
+Loop
+    
+End Sub
