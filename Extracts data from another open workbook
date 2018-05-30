@@ -1,0 +1,92 @@
+Sub ExtractData()
+'
+' ExtractData Macro
+'
+
+'
+'Setting up my different sheets with variable names so I can use the with function and shorten code later on.
+'If a variable is not initialed specifically (such as x, i, z, x1 in this example) it is saved as a varient type that
+'is similar to an array. It works well with numbers and ranges and is the most flexible data type for VBA.
+'The other popular data type you might use is string variables (letters and words, but can be numbers but you can't add two strings together).
+
+Dim WBS As Workbook
+Dim WBR As Workbook
+Set WBS = Workbooks("ViewReport.aspx")
+Set WBR = Workbooks("NEB sales to U.S. summary.xlsm")
+
+Dim Data As Worksheet
+Dim Rawdata As Worksheet
+Set Data = WBR.Worksheets("Data")
+Set Rawdata = WBS.Worksheets("ExportSalesSummaryReport")
+'Setting my sheets as variables saves me from writting long lines like:
+'Workbooks("ViewReport.aspx").Worksheets("ExportSalesSummaryReport").Cells(i,5).Value = date
+
+i = 10 'row progress in raw data
+x = 1 'row progress in results
+Z = 1 'Marks first row new data is added
+
+Do While True
+
+    'Checks if the next row is blank
+    'Note I use cells(x, y) everywheres because it lets you work with variables. You cannot use variable names in the form Cells(A1)
+    With Rawdata
+    If IsEmpty(.Cells(i, 9)) Then
+        Exit Do
+    End If
+   
+    'Finds data from Ontario
+    If .Cells(i, 6).Value = "Ontario" Then
+    
+        'Saves the parts of data I need
+        'Note: D = ___ assigns a value to D while ___ = D assigns the value of D to the blank (Usually a range of cells or a specific cell).
+         D = .Cells(9, 9).Value
+         Destination = .Cells(i, 1).Value
+         Energy = .Cells(i, 9).Value
+         Totalvalue = .Cells(i, 13).Value
+         CADMWh = .Cells(i, 17).Value
+        
+        'Finds the next open row to insert data. Also saves which row the data from this month starts (x1) so a sum can be done for each month.
+         With Data
+            Do While True
+                If IsEmpty(.Cells(x, 2)) Then
+                    'Marks first row of new data
+                    If Z = 1 Then
+                        x1 = x
+                        Z = 2
+                    End If
+                        
+                    Exit Do
+                End If
+                x = x + 1
+            Loop
+        .Cells(x, 1).Value = D
+        .Cells(x, 2).Value = Destination
+        .Cells(x, 3).Value = Energy
+        .Cells(x, 4).Value = Totalvalue
+        .Cells(x, 5).Value = CADMWh
+        End With
+        
+    End If
+    End With
+    i = i + 1
+Loop
+
+y = 2
+
+'Adds sums in a table next to the compiled Ontario data.
+With Data
+Do While True
+    If IsEmpty(.Cells(y, 7)) Then
+        Exit Do
+    End If
+    y = y + 1
+Loop
+        'Pastes the sums with the date
+        .Cells(y, 7).Value = D
+        .Cells(y, 8).Value = "U.S."
+        .Cells(y, 9).Value = Application.Sum(.Range(.Cells(x1, 3), .Cells(x, 3)))
+        .Cells(y, 10).Value = Application.Sum(.Range(.Cells(x1, 4), .Cells(x, 4)))
+        .Cells(y, 11).Value = Application.WorksheetFunction.Average(.Range(.Cells(x1, 5), .Cells(x, 5)))
+End With
+
+End Sub
