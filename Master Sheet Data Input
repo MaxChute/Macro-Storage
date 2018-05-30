@@ -1,0 +1,67 @@
+Sub InsertData1()
+'
+' InsertData1 Macro
+'
+' Keyboard Shortcut: Ctrl+i
+
+'Start Timer
+Dim StartTime As Double
+Dim SecondsElapsed As Double
+StartTime = Timer
+
+Application.ScreenUpdating = False
+
+I = 2
+
+Do While True
+
+    'Checks if the next row is blank
+    With Sheets("Raw Data")
+    If IsEmpty(.Cells(I, 3)) Then
+        Exit Do
+    End If
+    
+    'save the project and evaluator info
+    'copies the data
+    project = .Cells(I, 2)
+    evaluator = .Cells(I, 1)
+    
+    parta = .Range(.Cells(I, 3), .Cells(I, 8)).Value
+    partb = .Range(.Cells(I, 9), .Cells(I, 11)).Value
+    partc = .Range(.Cells(I, 14), .Cells(I, 31)).Value
+    
+    '.Range(.Cells(I, 3), .Cells(I, 31)).Select
+    'Selection.Copy
+    End With
+    
+  
+    x = 2
+    'Matches the project and then the evaluator
+    With Sheets("Master Summary")
+    For x = 2 To 500
+       If .Cells(x, 2).Value = project Then Exit For
+    Next x
+    y = x
+    For y = x To x + 10
+       If .Cells(y, 3).Value = evaluator Then Exit For
+    Next y
+    
+    .Range(.Cells(y, 5), .Cells(y, 10)).Value = parta
+    .Range(.Cells(y, 14), .Cells(y, 16)).Value = partb
+    .Range(.Cells(y, 19), .Cells(y, 36)).Value = partc
+    
+    'Pastes the data
+    '.Cells(y, 5).PasteSpecial xlPasteValues
+    End With
+   
+    I = I + 1
+    
+Loop
+
+Application.ScreenUpdating = True
+
+'End timer
+SecondsElapsed = Round(Timer - StartTime, 2)
+MsgBox "This code ran successfully in " & SecondsElapsed & " seconds", vbInformation
+
+End Sub
