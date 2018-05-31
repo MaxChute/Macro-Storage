@@ -1,0 +1,138 @@
+Sub Pull_Condense()
+'
+' Pull_Condense Macro
+'
+' Keyboard Shortcut: Ctrl+q
+
+Dim WB1 As Workbook
+Dim WB2 As Workbook
+Set WB1 = ThisWorkbook
+Set WB2 = ActiveWorkbook
+
+Dim Data As Worksheet
+Dim Rawdata As Worksheet
+Set Data = WB1.Worksheets(1)
+Set Rawdata = WB2.Worksheets(1)
+
+
+
+
+
+'HQ is 1
+'NPX is NEISO is 2
+'O H is IESO is 3
+'PJM is 4
+
+For n = 0 To 3
+
+x = 4 'row progress in results
+Mth = 1
+i = 2 'row progress in raw data
+
+    Do While True
+    
+        'Checks if the next row is blank
+        'Note I use cells(x, y) everywheres because it lets you work with variables. You cannot use variable names in the form Cells(A1)
+        With Rawdata
+        If IsEmpty(.Cells(i, 1)) Then
+            Exit Do
+        End If
+       
+        If Mth = 1 Then
+            Name = "Jan"
+        ElseIf Mth = 2 Then
+            Name = "Feb"
+        ElseIf Mth = 3 Then
+            Name = "Mar"
+        ElseIf Mth = 4 Then
+            Name = "Apr"
+        ElseIf Mth = 5 Then
+            Name = "May"
+        ElseIf Mth = 6 Then
+            Name = "Jun"
+        ElseIf Mth = 7 Then
+            Name = "Jul"
+        ElseIf Mth = 8 Then
+            Name = "Aug"
+        ElseIf Mth = 9 Then
+            Name = "Sep"
+        ElseIf Mth = 10 Then
+            Name = "Oct"
+        ElseIf Mth = 11 Then
+            Name = "Nov"
+        Else
+            Name = "Dec"
+        End If
+    
+        y = 0
+        period5 = 0
+        ave = 0
+        neghr = 0
+        avemonth = 0
+        u = 0
+        v = 0
+        
+        Do While True
+            If InStr(1, .Cells(i + n, 1).Text, Name) Then
+                stmnth = 1
+                
+                If v = 0 Then
+                    Dte = .Cells(i, 1).Value
+                    v = v + 1
+                End If
+                
+                
+                
+                For T = 0 To 11
+                    If T = 0 Then
+                        ave = .Cells(i + n + T * 4, 4).Value
+                        period5 = period5 + 1
+                    Else
+                        ave = (ave * period5 + .Cells(i + T * 4, 17).Value) / (period5 + 1)
+                        period5 = period5 + 1
+                    End If
+                Next T
+                
+                If ave <= 0 Then
+                    neghr = neghr + 1
+                    
+                    If u = 0 Then
+                        avemonth = ave
+                        u = 1
+                    Else
+                        avemonth = (avemonth * u + ave) / (u + 1)
+                        u = u + 1
+                    End If
+                End If
+                  
+            ElseIf stmnth = 0 Then GoTo StartMonth
+            
+            Else
+                Exit Do
+            End If
+            
+            i = i + T * 4
+        Loop
+        
+            
+        End With
+    
+             With Data
+                Do While True
+                    If IsEmpty(.Cells(x, 2 + n)) Then
+                        Exit Do
+                    End If
+                    x = x + 1
+                Loop
+            .Cells(x, 1).Value = Dte
+            .Cells(x, 2 + n).Value = neghr
+            .Cells(x, 6 + n).Value = avemonth
+            End With
+        
+StartMonth:
+        Mth = Mth + 1
+    Loop
+
+Next n
+
+End Sub
