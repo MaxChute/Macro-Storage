@@ -14,25 +14,20 @@ Dim Rawdata As Worksheet
 Set Data = WB1.Worksheets(1)
 Set Rawdata = WB2.Worksheets(1)
 
-
-
-
-
 'HQ is 1
 'NPX is NEISO is 2
 'O H is IESO is 3
 'PJM is 4
 
 For n = 0 To 3
-
-x = 4 'row progress in results
+stmnth = 0
 Mth = 1
+x = 4 'row progress in results
+
 i = 2 'row progress in raw data
 
     Do While True
     
-        'Checks if the next row is blank
-        'Note I use cells(x, y) everywheres because it lets you work with variables. You cannot use variable names in the form Cells(A1)
         With Rawdata
         If IsEmpty(.Cells(i, 1)) Then
             Exit Do
@@ -64,35 +59,35 @@ i = 2 'row progress in raw data
             Name = "Dec"
         End If
     
-        y = 0
         period5 = 0
         ave = 0
         neghr = 0
         avemonth = 0
-        u = 0
-        v = 0
+        u = 0 'start of new month
+        v = 0 'get date once
         
         Do While True
             If InStr(1, .Cells(i + n, 1).Text, Name) Then
                 stmnth = 1
                 
+                'Get Date
                 If v = 0 Then
-                    Dte = .Cells(i, 1).Value
-                    v = v + 1
+                    Dte = .Cells(i + n, 1).Value
+                    v = 1
                 End If
                 
-                
-                
+                'Get average price over an hour
                 For T = 0 To 11
                     If T = 0 Then
                         ave = .Cells(i + n + T * 4, 4).Value
                         period5 = period5 + 1
                     Else
-                        ave = (ave * period5 + .Cells(i + T * 4, 17).Value) / (period5 + 1)
+                        ave = (ave * period5 + .Cells(i + T * 4, 4).Value) / (period5 + 1)
                         period5 = period5 + 1
                     End If
                 Next T
                 
+                'check ave hour price and record if negative
                 If ave <= 0 Then
                     neghr = neghr + 1
                     
@@ -106,14 +101,13 @@ i = 2 'row progress in raw data
                 End If
                   
             ElseIf stmnth = 0 Then GoTo StartMonth
-            
             Else
                 Exit Do
             End If
             
             i = i + T * 4
+                    
         Loop
-        
             
         End With
     
@@ -124,13 +118,17 @@ i = 2 'row progress in raw data
                     End If
                     x = x + 1
                 Loop
-            .Cells(x, 1).Value = Dte
+            If n = 0 Then
+                .Cells(x, 1).Value = Dte
+            End If
+            
             .Cells(x, 2 + n).Value = neghr
             .Cells(x, 6 + n).Value = avemonth
             End With
-        
+            
 StartMonth:
         Mth = Mth + 1
+
     Loop
 
 Next n
