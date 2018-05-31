@@ -1,0 +1,154 @@
+Sub CondenseToDaysandMonths()
+'
+'
+'
+
+
+Dim WB1 As Workbook
+Set WB1 = ThisWorkbook
+
+
+Dim DataMonth As Worksheet
+Dim DataDay As Worksheet
+Dim Rawdata As Worksheet
+
+Set Rawdata = WB1.Worksheets("Flows")
+Set DayData = WB1.Worksheets("Daily Flow")
+Set MonthData = WB1.Worksheets("Monthly Flow")
+
+
+Mth = 1
+
+i = 4 'row progress in raw data
+x = 3 'row progress in day results
+y = 3 'row progress in month results
+
+'n = 0 is Michigan
+'n = 1 is Minnesota
+'n = 2 is New York
+
+For n = 0 To 2
+
+i = 4 'reset row counter
+x = 3
+y = 3
+
+Mth = 1
+    Do While True
+    
+        With Rawdata
+        
+        If IsEmpty(.Cells(i, 1)) Then
+            Exit Do
+        End If
+       
+        If Mth = 1 Then
+            Name = "Jan"
+        ElseIf Mth = 2 Then
+            Name = "Feb"
+        ElseIf Mth = 3 Then
+            Name = "Mar"
+        ElseIf Mth = 4 Then
+            Name = "Apr"
+        ElseIf Mth = 5 Then
+            Name = "May"
+        ElseIf Mth = 6 Then
+            Name = "Jun"
+        ElseIf Mth = 7 Then
+            Name = "Jul"
+        ElseIf Mth = 8 Then
+            Name = "Aug"
+        ElseIf Mth = 9 Then
+            Name = "Sep"
+        ElseIf Mth = 10 Then
+            Name = "Oct"
+        ElseIf Mth = 11 Then
+            Name = "Nov"
+        Else
+            Name = "Dec"
+        End If
+    
+
+        Z = 0
+        Period = 0
+        avemonth = 0
+        d = 0
+        h = 0
+
+        Do While True
+            If InStr(1, .Cells(i + h, 1).Text, Name) Then
+                aved = 0
+                'Get average flow over day
+                For h = 0 To 23
+                    If h = 0 Then
+                        aved = .Cells(i + h, 4 + n).Value
+                        Period = Period + 1
+                        Dte1 = .Cells(i, 1)
+                    Else
+                        aved = (aved * Period + .Cells(i + h, 4 + n).Value) / (Period + 1)
+                        Period = Period + 1
+                    End If
+                Next h
+                
+                
+                
+                If d = 0 Then
+                    avemonth = aved
+                    d = d + 1
+                Else
+                    avemonth = (avemonth * d + aved) / (d + 1)
+                    d = d + 1
+                End If
+                                
+                Dte2 = .Cells(i, 1)
+                
+                                
+                                
+                'Print out day data
+                With DayData
+              
+                    Do While True
+                        If IsEmpty(.Cells(x, 2 + n)) Then
+                            Exit Do
+                        End If
+                        x = x + 1
+                    Loop
+                
+                .Cells(x, 1).Value = Dte1
+                .Cells(x, 2 + n).Value = aved
+                
+                End With
+                
+            Else
+                Exit Do
+            End If
+            
+            i = i + h
+            h = 0
+            
+        Loop
+            
+        End With
+            'Print out month data
+             With MonthData
+             
+                Do While True
+                    If IsEmpty(.Cells(y, 2 + n)) Then
+                        Exit Do
+                    End If
+                    y = y + 1
+                Loop
+        
+                .Cells(y, 1).Value = Dte2
+                .Cells(y, 2 + n).Value = avemonth
+                avemonth = 0
+            End With
+            
+        Mth = Mth + 1
+
+    Loop
+
+Next n
+
+End Sub
+
