@@ -1,0 +1,174 @@
+Sub FlowDataCondenser()
+'
+'
+'
+
+Dim WB1 As Workbook
+Dim WB2 As Workbook
+Set WB1 = ThisWorkbook
+Set WB2 = ActiveWorkbook
+
+Dim MonthData As Worksheet
+Dim DayData As Worksheet
+Dim Rawdata As Worksheet
+
+Set MonthData = WB1.Worksheets("Monthly Flow")
+Set DayData = WB1.Worksheets("Daily Flow")
+Set Rawdata = WB2.Worksheets(1)
+
+'HQ Cedars is 0
+'HQ NYISO is 1
+
+For n = 0 To 1
+
+stmnth = 0
+Mth = 1
+x = 3 'row progress in results
+i = 2 'row progress in raw data
+y = 3
+
+    Do While True
+    
+        With Rawdata
+        If IsEmpty(.Cells(i, 1)) Then
+            Exit Do
+        End If
+       
+        If Mth = 1 Then
+            Name = "Jan"
+        ElseIf Mth = 2 Then
+            Name = "Feb"
+        ElseIf Mth = 3 Then
+            Name = "Mar"
+        ElseIf Mth = 4 Then
+            Name = "Apr"
+        ElseIf Mth = 5 Then
+            Name = "May"
+        ElseIf Mth = 6 Then
+            Name = "Jun"
+        ElseIf Mth = 7 Then
+            Name = "Jul"
+        ElseIf Mth = 8 Then
+            Name = "Aug"
+        ElseIf Mth = 9 Then
+            Name = "Sep"
+        ElseIf Mth = 10 Then
+            Name = "Oct"
+        ElseIf Mth = 11 Then
+            Name = "Nov"
+        Else
+            Name = "Dec"
+        End If
+    
+        'period5 = 0
+        'Period = 0
+        'aveh = 0
+        avemonth = 0
+        u = 0 'start of new month
+        'v = 0 'get date once
+        
+        Do While True
+            If InStr(1, .Cells(i + n, 1).Text, Name) Then
+                
+                stmnth = 1
+                Period = 0
+                v = 0
+                aved = 0 '?
+                
+                'AVERAGE FLOW
+                For h = 0 To 23
+                
+                    'Get Date
+                    If v = 0 Then
+                        Dte1 = .Cells(i + n, 1).Value
+                        v = 1
+                    End If
+                    
+                    period5 = 0
+                    aveh = 0
+                    
+                    
+                    'AVERAGE HOUR FLOW
+                    For T = 0 To 11
+                        If T = 0 Then
+                            aveh = .Cells(i + n + T * 2, 4).Value
+                            period5 = period5 + 1
+                        Else
+                            aveh = (aveh * period5 + .Cells(i + n + T * 2, 4).Value) / (period5 + 1)
+                            period5 = period5 + 1
+                        End If
+                    Next T
+                    
+                    
+                    'AVERAGE DAY FLOW
+                    If h = 0 Then
+                        aved = aveh
+                        Period = Period + 1
+                        'Dte2 = .Cells(i, 1)
+                    Else
+                        aved = (aved * Period + aveh) / (Period + 1)
+                       Period = Period + 1
+                    End If
+                Next h
+                
+                               
+                'AVE MONTH FLOW
+                               
+                    If u = 0 Then
+                        avemonth = aved
+                        u = u + 1
+                    Else
+                        avemonth = (avemonth * u + aved) / (u + 1)
+                        u = u + 1
+                    End If
+                
+                'Print out day data
+                With DayData
+              
+                    Do While True
+                        If IsEmpty(.Cells(x, 2 + n)) Then
+                            Exit Do
+                        End If
+                        x = x + 1
+                    Loop
+                
+                .Cells(x, 1).Value = Dte1
+                .Cells(x, 2 + n).Value = aved
+                
+                End With
+                  
+            ElseIf stmnth = 0 Then GoTo StartMonth
+            
+            Else
+                Exit Do
+            End If
+            
+            i = i + (T * 2) * h + 2
+            
+        
+        Loop
+            
+        End With
+    
+             With MonthData
+                Do While True
+                    If IsEmpty(.Cells(y, 2 + n)) Then
+                        Exit Do
+                    End If
+                    y = y + 1
+                Loop
+                
+                .Cells(y, 1).Value = Dte1
+                .Cells(y, 2 + n).Value = avemonth
+                
+            End With
+            
+StartMonth:
+        Mth = Mth + 1
+
+        
+    Loop
+
+Next n
+
+End Sub
