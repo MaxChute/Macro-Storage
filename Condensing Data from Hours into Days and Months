@@ -78,7 +78,11 @@ Mth = 1
         Do While True
             If InStr(1, .Cells(i + h, 1).Text, Name) Then
                 aved = 0
+                
+                Period = 0
+                
                 'Get average flow over day
+                             
                 For h = 0 To 23
                     If h = 0 Then
                         aved = .Cells(i + h, 4 + n).Value
